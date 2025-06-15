@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% if profile %}
+    <h1>Edit your profile</h1>
+    <h4>These are all optional to change. If you don't want to change you can input your original data</h4>
+    <form id="EditForm">
+        <label for="username">Username:</label>
+        <input type="username" id="username" placeholder="{{ profile.name.username }}" required />
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="{{ profile.name.email }}" required />
+        <label for="password">Password is hashed(Enter your new password)</label>
+        <input type="password" id="passsword" placeholder="{{ profile.name.password }}" required />
+        <button type="submit">Confirm</button>
+    </form>
+    {% else %}
+    <h2>No profile found</h2>
+    {% endif %}
+
+    <script src="{% static 'csrf.js' %}"></script>
+    <script type="text/javascript">
+        const userId = localStorage.getItem('userId');
+        
+        if (!userId) {
+            alert("Log in to edit your profile.");
+            window.location.href = "/login/";
+        }
+        document.getElementById('EditForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('passsword').value;
+            const email = document.getElementById('email').value;
+
+            fetch(`/api/edit/${userId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    "username": username,
+                    "email": email,
+                    "password": password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.alert ('Profile updated successfully!');
+                    window.location.href = "{% url 'home' %}";
+                } else {
+                    window.alert('Update failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
