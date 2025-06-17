@@ -20,13 +20,19 @@
             <a class="nav-link active" href="{% url 'home' %}">Home</a>
         </li>
         <li class="nav-item px-3">
-            <a class="nav-link" id="menu-tab" href="{% url 'menu' %}" >Menus</a>
+            <a class="nav link" id="promo_btn" style="color: lightgray; text-decoration: none; margin-top: 8px;" >Promotions</a>
         </li>
         <li class="nav-item px-3">
-            <a class="nav-link" href="{% url 'register' %}" id="register-tab">Register Account </a>
+            <a class="nav-link" style="color: lightgray;" id="menu-tab" href="{% url 'menu' %}" >Menus</a>
         </li>
         <li class="nav-item px-3">
-            <button class="btn btn-link text-white nav-item px-3" id="profile-btn">Profile</button>
+            <a class="nav-link" style="color: lightgray;" href="{% url 'register' %}" id="register-tab">Register Account </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav link" id="profile-btn" style="color: lightgray; text-decoration: none; margin-top: 8px;">Profile</a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav link" id="noti_btn" style="color: lightgray; text-decoration: none; margin-top: 8px;">Notifications</a>
         </li>
         </ul>
     </div>
@@ -46,8 +52,12 @@
                         Points: {{ data.points }}<br>
                         Joined on: {{ data.created_at }}<br></bold>
                     </p>
+                    <button class="text-dark" id="storage"> Purchase History</button><br></br>
+                    <a class="text-dark" id="pr-btn" href="{% url 'point_request' %}"> Point request </a>
+                    <br></br>
                     <button class="text-dark" id="logout-btn">Log Out</button>
                     <button class="text-dark" id="psw-btn">Password reset</button>
+                    <a class="text-dark" id="rewards-btn" href="{% url 'rewards' %}">Reward Button</a>
                 </div>
             </div>
         {% else %}
@@ -55,5 +65,15 @@
         {% endif %}
         <script src="{% static 'csrf.js' %}"></script>
         <script src="{% static 'javascript.js' %}"></script>
+        <script>
+            const storage=document.getElementById("storage")
+            const userId=localStorage.getItem('userId')
+
+            storage.addEventListener('click', function(e){
+                e.preventDefault
+
+                window.location.href=`/storage/${userId}/`
+            })
+        </script>
 </body>
 </html>

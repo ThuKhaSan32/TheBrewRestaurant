@@ -37,10 +37,49 @@
         </ul>
     </div>
     </nav>
-    <div>
 
+    <div class="container" style="max-width: 1000px; margin: auto; padding: 20px;">
+        <h2 style="text-align:center; margin-bottom: 30px;">Available Rewards</h2>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+            {% for reward in rewards %}
+            <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h4 style="margin-bottom: 10px;">{{ reward.name }}</h4>
+                <p style="margin: 0 0 10px;">{{ reward.description }}</p>
+                <p style="font-weight: bold; color: #28a745;">Cost: {{ reward.points_required }} points</p>
+                <button onclick="claimReward('{{ reward.id }}')" style="background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+                    Claim
+                </button>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     <script src="{% static 'csrf.js' %}"></script>
     <script src="{% static 'javascript.js' %}"></script>
+    <script>
+        function claimReward(rewardId){
+            const userId=localStorage.getItem('userId')
+
+            fetch(`/claim_rewards/${userId}/${rewardId}/`,{
+                method:"POST",
+                headers:{
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body:JSON.stringify({}),
+            })
+            .then (response => response.json())
+            .then(data =>{
+                if(data.success){
+                    alert(data.message)
+                }else{
+                    alert(data.message)
+                }
+            })
+            .catch(error =>{
+                alert("Network error")
+            })
+        }
+    </script>
 </body>
 </html>

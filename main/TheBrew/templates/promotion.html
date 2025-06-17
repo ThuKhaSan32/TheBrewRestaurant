@@ -37,9 +37,16 @@
         </ul>
     </div>
     </nav>
-    <div>
-
-    </div>
+        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 40px;">
+            {% for promo in promotions %}
+            <div style="flex: 0 0 45%; background-color: lightgray; padding: 20px; border: 1px solid #000; box-sizing: border-box;">
+                <h4>{{ promo.name }}</h4>
+                <p>{{ promo.description }}</p>
+                <p><strong>Start Date:</strong> {{ promo.created_at }}</p>
+                <p><strong>Expires on:</strong> {{ promo.expired_date }}</p>
+            </div>
+            {% endfor %}
+        </div>
     <script src="{% static 'csrf.js' %}"></script>
     <script src="{% static 'javascript.js' %}"></script>
 </body>

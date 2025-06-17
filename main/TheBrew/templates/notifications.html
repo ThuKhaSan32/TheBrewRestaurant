@@ -37,9 +37,15 @@
         </ul>
     </div>
     </nav>
-    <div>
+    {% for notification in notifications %}
+        <div class="container-fluid bg-secondary mb-2 p-3 rounded text-white position-relative" style="margin-top:10px; margin-bottom: 10px;">
+            <p class="mb-1">{{ notification.message }}</p>
+            <small class="position-absolute end-0 bottom-0 me-2 mb-1 text-light">
+                {{ notification.created_at|date:"M d, Y H:i" }}
+            </small>
+        </div>
+    {% endfor %}
 
-    </div>
     <script src="{% static 'csrf.js' %}"></script>
     <script src="{% static 'javascript.js' %}"></script>
 </body>

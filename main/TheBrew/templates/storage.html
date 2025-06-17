@@ -38,8 +38,15 @@
     </div>
     </nav>
     <div>
-
-    </div>
+        {% for item in history %}
+            <div class="container-fluid bg-secondary mb-2 p-3 rounded text-white position-relative" style="margin-top:10px; margin-bottom: 10px;">
+                <p class="mb-1">You claimed: {{ item.reward }} </p>
+                <small>
+                    Claimed at:{{ item.claimed_at|date:"Y-m-d H:i:s" }}
+                </small>
+            </div>
+        {% endfor %}
+        </div>
     <script src="{% static 'csrf.js' %}"></script>
     <script src="{% static 'javascript.js' %}"></script>
 </body>

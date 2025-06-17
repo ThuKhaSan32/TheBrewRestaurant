@@ -1,4 +1,5 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
+from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import UserRegisterSerializer, ProfileSerializer,LoginSerializer
@@ -6,9 +7,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .models import Profile,Log,Menu
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import permission_classes
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+from .models import PointRequest,PointRequest_Image,Notification,Promotion,Reward,ClaimedReward
+from django.http import JsonResponse
+from datetime import date
 # Create your views here.
 
 def register(request):
@@ -112,7 +113,82 @@ def menu(request):
 
 def point_request(request):
     return render(request, 'point_request.html')
+
+def point_request_add_data(request,id):
+    if request.method == 'POST':
+        user=Profile.objects.get(name__id=id)
+        points_requested = request.POST.get('points_requested')
+        image = request.FILES.get('image')
+
+        if not points_requested or not image:
+            return render(request, 'point_request.html', {"error": "All fields are required."})
         
+        point_request = PointRequest.objects.create(
+            account=user,
+            points_requested=points_requested,
+        )
+        point_request.save()
 
+        if 'image' in request.FILES:
+            point_request_image = PointRequest_Image.objects.create(
+                image=image,
+                request=point_request
+            )
+            point_request_image.save()
 
+        return JsonResponse({
+            "success": True,
+            "message": "Point request added successfully",
+            "point_request_id": point_request.id
+        }, status=201)
+    return JsonResponse({
+        "success": False,
+        "message": "Invalid request method"
+    }, status=405)
+
+def notifications(request, id):
+    user = get_object_or_404(Profile, name__id=id)
+    notifications = Notification.objects.filter(account=user).order_by('-created_at')
+    return render(request, 'notifications.html', {"notifications": notifications})
+        
+def promotions(request,id=None):
+    if id :
+        user=get_object_or_404(Profile, name__id=id)
+        if user.status=="diamond":
+            promotions=Promotion.objects.filter(expired_date__gte=date.today())
+        else:
+            promotions=Promotion.objects.filter(audience='everyone',expired_date__gte=date.today())        
+    else:
+        promotions=Promotion.objects.filter(audience='everyone',expired_date__gte=date.today())
+
+    return render(request,'promotion.html',{"promotions":promotions} )
+
+def rewards(request):
+    rewards=Reward.objects.all()
+    return render(request,'rewards.html',{"rewards":rewards})
+
+def claimRewards(request,userId,rewardId):
+    profile=Profile.objects.get(name__id=userId)
+    reward=Reward.objects.get(pk=rewardId)
+
+    if profile.points >= reward.points_required:
+        profile.points -= reward.points_required
+        profile.save()
+
+        ClaimedReward.objects.create(profile=profile,reward=reward)
+
+        return JsonResponse({
+            "success":True,
+            "message":"You have redeemed the reward successfully"
+        })
+    else:
+        return JsonResponse({
+            "success":False,
+            "message":"You don't have enough points"
+        })
+
+def storage(request,id):
+    user=Profile.objects.get(name__id=id)
+    history=ClaimedReward.objects.filter(profile=user)
+    return render(request,"storage.html",{"history":history})
 

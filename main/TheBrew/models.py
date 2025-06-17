@@ -43,8 +43,7 @@ class Menu(models.Model):
         return self.name
     
 class PointRequest(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='point_requests/')
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
     points_requested = models.IntegerField()
     date_requested = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=[
@@ -54,4 +53,43 @@ class PointRequest(models.Model):
     ], default='pending')
 
     def __str__(self):
-        return self.profile.name.username
+        return self.account.name.username
+
+class PointRequest_Image(models.Model):
+    image = models.ImageField(upload_to='point_requests/')
+    request = models.ForeignKey(PointRequest, on_delete=models.CASCADE,null=True, blank=True)
+
+class Notification(models.Model):
+    account = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.account.name.username
+    
+class Promotion(models.Model):
+    name = models.CharField(max_length=250)
+    description = models.TextField()
+    audience = models.CharField(choices=[('everyone','Everyone'),('diamond','Diamond')],default='everyone')
+    created_at=models.DateField()
+    expired_date=models.DateField()
+
+    def __str__(self):
+        return self.name
+    
+class Reward(models.Model):
+    name = models.CharField(max_length=100)
+    points_required = models.PositiveIntegerField()
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+    
+class ClaimedReward(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    reward = models.ForeignKey(Reward, on_delete=models.CASCADE)
+    claimed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.profile} claimed {self.reward}"
+

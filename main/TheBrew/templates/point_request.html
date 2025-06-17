@@ -20,28 +20,32 @@
             <a class="nav-link active" href="{% url 'home' %}">Home</a>
         </li>
         <li class="nav-item px-3">
-            <a class="nav-link" id="menu-tab" href="{% url 'menu' %}" >Menus</a>
+            <a class="nav link" id="promo_btn" style="color: lightgray; text-decoration: none; margin-top: 8px;" >Promotions</a>
         </li>
         <li class="nav-item px-3">
-            <a class="nav-link" href="{% url 'register' %}" id="register-tab">Register Account </a>
+            <a class="nav-link" style="color: lightgray;" id="menu-tab" href="{% url 'menu' %}" >Menus</a>
         </li>
         <li class="nav-item px-3">
-            <button class="btn btn-link text-white nav-item px-3" id="profile-btn">Profile</button>
+            <a class="nav-link" style="color: lightgray;" href="{% url 'register' %}" id="register-tab">Register Account </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav link" id="profile-btn" style="color: lightgray; text-decoration: none; margin-top: 8px;">Profile</a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav link" id="noti_btn" style="color: lightgray; text-decoration: none; margin-top: 8px;">Notifications</a>
+        </li>
         </ul>
     </div>
     </nav>
-
     <div class="container mt-5 bg-warning" style="width:50%; margin:auto"> 
         <h2 style="margin-top: 20px; padding:10px;">Point Request</h2>
 
         <form id="pointRequestForm" enctype="multipart/form-data" style="width: 50%; margin: auto;">
-            <label for="points">Points to Request:</label><br />
-            <input type="number" id="points" name="points" required /><br /><br />
+            {% csrf_token %}
+            <label for="points_requested">Points to Request:</label><br />
+            <input type="number" id="points_requested" name="points_requested" required /><br /><br />
 
-            <label for="reason">Reason (optional):</label><br />
-            <textarea id="reason" name="reason" rows="4" cols="30"></textarea><br /><br />
-
-            <label for="image">Upload Receipt or Proof (optional):</label><br />
+            <label for="image">Upload Receipt or Proof:</label><br />
             <input type="file" id="image" name="image" accept="image/*" required /><br /><br />
 
             <button type="submit" style="margin-bottom: 15px;">Submit Request</button>
@@ -50,21 +54,41 @@
         <p id="message"></p>
     </div>
     <script src="{% static 'csrf.js' %}"></script>
-    <script src="{% static 'javascript.js' %}"></script>
+    <script src="{% static 'javascript.js' %}" defer></script>
     <script>
-        document.getElementById('pointRequestForm').addEventListener('submit', function(event){
+        const form = document.getElementById('pointRequestForm');
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            const points= documnent.getElementById('points').value;
-            const reason = document.getElementById('reason').value;
-            const image= document.getElementById('image').files[0];
             const userId = localStorage.getItem('userId');
-            if (!userId) {
-                alert("Log in to request points.");
-                window.location.href = "{% url 'home' %}";
-                return;
-            }
-        })
+
+            const pointsRequested = document.getElementById('points_requested').value;
+            const image = document.getElementById('image').files[0];
+
+            const formData = new FormData();
+            formData.append('points_requested', pointsRequested);
+            formData.append('image', image);
+
+            fetch(`/point_request_add/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Point request submitted successfully!');
+                    window.location.href = `/profile/${userId}/`;
+                } else {
+                    alert('Error');
+                }
+            })
+            .catch(error => {
+                console.error("Request failed:", error);
+                alert("Something went wrong while submitting. Try again later.");
+        });
+    })
     </script>
 </body>
 </html>
